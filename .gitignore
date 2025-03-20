@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+.env/
+
+# Log files
+*.log
+
+# Audio outputs
+audio.wav
+
+# Screenshot (ignored unless you want to keep it out of the repo)
+screenshot.png
