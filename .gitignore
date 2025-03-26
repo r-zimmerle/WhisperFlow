@@ -13,8 +13,16 @@ venv/
 # Audio outputs
 audio.wav
 
-# Screenshot (ignored unless you want to keep it out of the repo)
+# PyInstaller output folders & spec file
+build/
+dist/
+*.spec
+
+# Screenshot 
 screenshot.png
 
-# Local scripts
-*.bat 
+# Scripts locais
+*.bat
+
+# Icons
+*.ico

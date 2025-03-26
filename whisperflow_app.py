@@ -27,26 +27,31 @@ is_transcribing = False
 def record_audio():
     """Starts audio recording."""
     global frames, recording
-    frames = []  # Ensure frames always starts as an empty list
+    frames = []
     recording = True
     print("🎙️ Recording... Press 'Stop Recording' to finish.")
 
+    # Atualiza o status no UI
+    update_status("Recording...", "red")
+
     def callback(indata, frame_count, time_info, status):
         if recording:
-            frames.append(indata.copy())  # Correctly append audio frames
+            frames.append(indata.copy())
 
     with sd.InputStream(samplerate=SAMPLE_RATE, channels=CHANNELS, callback=callback):
         while recording:
-            sd.sleep(100)  # Controls recording flow
+            sd.sleep(100)
 
 def stop_recording():
     """Stops recording, saves the file, and starts transcription in a background thread."""
     global recording
     recording = False
     print("🛑 Recording stopped. Will now transcribe in background...")
+    update_status("Stopped", "white")
 
     if len(frames) == 0:
         print("No audio captured.")
+        update_status("No audio captured", "orange")
         return
 
     audio_data = np.concatenate(frames, axis=0)
@@ -56,7 +61,6 @@ def stop_recording():
         wf.setframerate(SAMPLE_RATE)
         wf.writeframes((audio_data * 32767).astype(np.int16).tobytes())
 
-    # Run transcribe_audio in a separate thread to avoid freezing the UI
     threading.Thread(target=transcribe_audio, daemon=True).start()
 
 def transcribe_audio():
@@ -64,34 +68,36 @@ def transcribe_audio():
     global is_transcribing
     is_transcribing = True
 
+    update_status("Transcribing...", "blue")
     text_output.delete("1.0", "end")
     text_output.insert("end", "Transcribing... Please wait.\n")
     print("🔎 Transcribing in background...")
 
-    # Perform the transcription
     result = model.transcribe(
         OUTPUT_FILE,
         language="portuguese",
-        fp16=True,            # half-precision => faster on most GPUs
-        temperature=0,        # fully deterministic
+        fp16=True,
+        temperature=0,
         beam_size=1,
         best_of=1,
-        word_timestamps=False,# skip word timing for speed
+        word_timestamps=False,
         no_speech_threshold=0.4,
         condition_on_previous_text=False,
         initial_prompt="Please use correct punctuation, including periods and commas."
     )
 
-    # Update the UI after transcribing
     text_output.delete("1.0", "end")
     text_output.insert("end", result["text"])
-
-    # Copy to clipboard (Windows only)
     os.system(f'echo {result["text"].strip()} | clip')
     text_output.insert("end", "\n(Transcription copied to clipboard!)")
     print("📋 Transcription copied to clipboard!")
 
+    update_status("Idle", "white")
     is_transcribing = False
+
+def update_status(text, color="white"):
+    """Updates the status label in the UI."""
+    status_label.configure(text=f"Status: {text}", text_color=color)
 
 def start_recording_thread():
     """Starts recording in a separate thread."""
@@ -100,14 +106,14 @@ def start_recording_thread():
 def exit_app():
     """Cleanly exit the application."""
     print("Exiting application...")
-    app.quit()  # or app.destroy()
+    app.quit()
 
 # Create UI with CustomTkinter
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
 app = ctk.CTk()
-app.geometry("500x450")
+app.geometry("500x480")
 app.title("Whisper Turbo Transcriber (No Triton)")
 
 label = ctk.CTkLabel(app, text="Whisper Turbo - Speech-to-Text", font=("Arial", 18))
@@ -118,6 +124,9 @@ start_button.pack(pady=10)
 
 stop_button = ctk.CTkButton(app, text="Stop Recording & Transcribe", command=stop_recording)
 stop_button.pack(pady=10)
+
+status_label = ctk.CTkLabel(app, text="Status: Idle", font=("Arial", 14))
+status_label.pack(pady=5)
 
 text_output = ctk.CTkTextbox(app, height=200, wrap="word")
 text_output.pack(padx=10, pady=10, fill="both", expand=True)
