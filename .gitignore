@@ -15,3 +15,6 @@ audio.wav
 
 # Screenshot (ignored unless you want to keep it out of the repo)
 screenshot.png
+
+# Local scripts
+*.bat 
