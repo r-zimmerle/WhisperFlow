@@ -1,83 +1,147 @@
-# WhisperFlow - Real-time & File Transcription
+# WhisperFlow - Real-time Audio Transcription
 
 ## Overview
-WhisperFlow is a real-time speech-to-text transcription tool powered by OpenAI's Whisper model. It supports both microphone input and file-based transcription with GPU acceleration.
 
-## Features
-- 🎤 **Live transcription**: Capture audio directly from the microphone.
-- 📂 **File-based transcription**: Import `.wav`, `.mp3`, `.m4a`, and other formats.
-- ⚡ **CUDA support**: Leverages NVIDIA GPUs for faster inference.
-- 🌍 **Multilingual support**: Set a preferred language or use `Auto Detect`.
-- 🔠 **Model selection**: Choose between `tiny`, `small`, `medium`, or `large` models.
-- 📝 **Custom prompt**: Improve transcription accuracy with predefined prompts.
-- 🚀 **Optimized performance**: Uses FP16 precision and tuned parameters.
-- ❌ **Triton disabled**: Avoids potential issues on Windows.
+**WhisperFlow** is a simple real-time speech transcription project using OpenAI’s [Whisper](https://github.com/openai/whisper) model. Currently, the app records audio from the microphone, saves it to an `audio.wav` file, and performs transcription in the background.
+
+> **Note:** Some initially mentioned features (like multi-model selection in the UI, direct file transcription, English translation, etc.) **haven’t been implemented yet**. They are only future ideas.
+
+---
+
+## Features (Implemented)
+
+- 🎤 **Real-time transcription**: Records audio through the microphone and saves locally.
+    
+- ⚡ **GPU acceleration (CUDA)**: Uses NVIDIA GPUs for faster inference (if available).
+    
+- 🔠 **Custom prompt**: Includes an initial prompt to improve punctuation accuracy.
+    
+- ❌ **Triton disabled**: Avoids compatibility issues on Windows.
+    
+
+## Features (Planned / Not Implemented)
+
+- 📂 **File-based transcription**: Import `.wav`, `.mp3`, `.m4a` via the UI.
+    
+- 🌍 **Full multilingual support**: Currently, the code is set to Portuguese only.
+    
+- 📝 **UI model selection**: Right now, the code defaults to the `small` model.
+    
+- 🌐 **English translation**: The `task="translate"` parameter isn’t added yet.
+    
+- 🔧 **Advanced settings window**: An easy way to adjust Whisper parameters.
+    
+- 🗂 **Drag & drop**: Drag and drop files for easier transcription.
+    
+- 📝 **Character-based segmentation**: Not implemented yet.
+    
+
+---
 
 ## Installation
 
-### 1. Install Dependencies
-Ensure you have Python 3.9+ installed and create a virtual environment:
+### 1. Python Environment
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows use: venv\Scripts\activate
-```
+Make sure you have Python 3.9+ installed. Create and activate a virtual environment:
 
-Install required packages:
+bash
 
-```bash
-pip install -r requirements.txt
-```
+CopiarEditar
 
-### 2. Install FFmpeg
-FFmpeg is required for processing audio files. Install it via:
+`python -m venv venv # Linux/macOS: source venv/bin/activate # Windows: venv\Scripts\activate`
 
-```bash
-sudo apt install ffmpeg  # Linux
-choco install ffmpeg     # Windows (using Chocolatey)
-brew install ffmpeg      # macOS
-```
+Then install the required packages:
 
-### 3. Run the Application
-```bash
-python whisperflow_app.py
-```
+bash
+
+CopiarEditar
+
+`pip install -r requirements.txt`
+
+### 2. FFmpeg
+
+FFmpeg is required to handle audio processing. Install it according to your operating system:
+
+bash
+
+CopiarEditar
+
+`# Linux (Debian/Ubuntu) sudo apt install ffmpeg  # Windows (via Chocolatey) choco install ffmpeg  # macOS (via Homebrew) brew install ffmpeg`
+
+### 3. Running the Application
+
+Run the main file (e.g., `whisperflow_app.py` or `main.py`):
+
+bash
+
+CopiarEditar
+
+`python whisperflow_app.py`
+
+---
 
 ## Usage
+
 ### Microphone Transcription
+
 1. Click **Start Recording** to begin capturing audio.
-2. Click **Stop Recording & Transcribe** to process and display the transcript.
-3. Transcription appears in the text box and is copied to the clipboard.
+    
+2. Speak normally; the app stores audio in memory.
+    
+3. Click **Stop Recording & Transcribe** to finalize capture.
+    
+4. The audio is saved as `audio.wav` and transcribed in the background.
+    
+5. The result appears in the UI and is automatically copied to the clipboard (Windows only).
+    
 
-### File-based Transcription
-1. Click **Transcription Configuration**.
-2. Import audio files (`.wav`, `.mp3`, `.flac`, etc.).
-3. Adjust model, language, and other settings.
-4. Click **Transcribe** to process selected files.
+---
 
-## Configuration Options
-| Setting               | Description |
-|----------------------|-------------|
-| **Model**            | Choose `tiny`, `small`, `medium`, or `large` |
-| **Transcription Language** | Set a preferred language (or Auto Detect) |
-| **Translate to English** | Convert output to English (not implemented yet) |
-| **Max Characters per Segment** | (Placeholder, not active in PyPI Whisper) |
-| **Prompt** | Improve accuracy with a custom transcription prompt |
+## Code Settings
 
-## Known Issues & Workarounds
-- **Windows GPU users** may experience errors with Triton. This is disabled by default using:
-  ```python
-  os.environ["WHISPER_FORCE_DISABLE_TRITON"] = "1"
-  ```
-- **WSL users** may need additional configuration for PortAudio (`sounddevice` issues).
+Currently, the configuration is fixed in the script:
+
+- **Model:** The code uses `"small"` by default. To change, edit the `MODEL_NAME` variable (e.g., `"tiny"`, `"medium"`, etc.).
+    
+- **Language:** The `transcribe` method is set to `"portuguese"`. Adjust as desired.
+    
+- **Initial Prompt:** Used to improve punctuation. Change or remove it as needed.
+    
+
+> If no GPU is available, the code automatically defaults to CPU mode.
+
+---
+
+## Known Issues
+
+- **Windows compatibility**: Triton is disabled by default to avoid errors related to Whisper on Windows.
+    
+- **WSL**: If running under Windows Subsystem for Linux (WSL), additional setup might be needed for `sounddevice` to capture audio.
+    
+
+---
 
 ## Future Improvements
-- 🔧 **GUI Enhancements**: A settings panel to choose model, language, and configure Whisper directly.
-- 🗂 **Drag & Drop File Support**: Easier file selection for batch transcription.
-- 🌐 **Translation Support**: Implement `task="translate"` for multilingual users.
+
+- 📂 **File-based Transcription**: Load audio files directly via the UI.
+    
+- 🌐 **Translation**: Add `task="translate"` to convert transcripts to English.
+    
+- 🗂 **Settings Panel**: Select model, language, and Whisper’s advanced parameters in the app.
+    
+- 📝 **Segmentation**: Control the maximum character length per segment.
+    
+- 🗃️ **Batch Processing**: Support multiple files in sequence.
+    
+
+---
 
 ## Contributing
-Feel free to fork this repository, submit issues, or suggest improvements!
+
+Feel free to open **issues**, submit PRs, or propose discussions for new features. Contributions are welcome!
+
+---
 
 ## License
-This project is open-source and follows the MIT License.
+
+This project is open-source under the [MIT](LICENSE) License.
